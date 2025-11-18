@@ -315,9 +315,8 @@ def get_lr(it):
     return min_lr + coeff * (max_lr - min_lr)
 
 
-
 # optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4, betas=(0.9,0.95), eps=1e-8)
-optimizer = raw_model.configure_optimizers(weight_decay=0.1, learning_rate=6e-4, device_type=device_type)
+optimizer = raw_model.configure_optimizers(weight_decay=0.1, learning_rate=6e-5, device_type=device_type)
 
 for step in range(max_steps):
     t0 = time.time()
@@ -326,7 +325,7 @@ for step in range(max_steps):
     for micro_step in range(grad_accum_steps):
         x, y = train_loader.next_batch()
         x,y = x.to(device), y.to(device)
-        with torch.autocast(device_type=device_type, dtype=torch.float16):   # bfloat16 is not supported on tesla T4
+        with torch.autocast(device_type=device_type, dtype=torch.bfloat16):   # bfloat16 is not supported on tesla T4
             logits, loss = model(x, y)
         loss = loss/ grad_accum_steps
         loss_accum += loss.detach()
